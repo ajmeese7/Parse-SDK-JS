@@ -264,6 +264,7 @@ class ParseObject {
         // Due to the way browsers construct maps, the key order will not change
         // unless the object is changed
         try {
+          console.log("Right above `encode` in `_getDirtyObjectAttributes`")
           const json = encode(val, false, true);
           const stringified = JSON.stringify(json);
           if (objectCache[attr] !== stringified) {
@@ -460,6 +461,7 @@ class ParseObject {
    * @returns {object}
    */
   toJSON(seen: Array<any> | void, offline?: boolean): AttributeMap {
+    console.log("Right above `encode` in ParseObject's `toJSON`")
     const seenEntry = this.id ? this.className + ':' + this.id : this;
     seen = seen || [seenEntry];
     const json = {};
@@ -468,6 +470,7 @@ class ParseObject {
       if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
         json[attr] = attrs[attr].toJSON();
       } else {
+        console.log("About to encode attribute:", attr, "value:", attrs[attr])
         json[attr] = encode(attrs[attr], false, false, seen, offline);
       }
     }
