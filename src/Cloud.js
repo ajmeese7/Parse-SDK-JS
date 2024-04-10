@@ -109,9 +109,6 @@ const DefaultController = {
   run(name, data, options: RequestOptions) {
     const RESTController = CoreManager.getRESTController();
 
-    console.log("run cloud function name:", name);
-    console.log("run cloud function data:", data);
-    console.log("run cloud function options:", options);
     const payload = encode(data, true);
 
     const request = RESTController.request('POST', 'functions/' + name, payload, options);
@@ -135,10 +132,8 @@ const DefaultController = {
   },
 
   async startJob(name, data, options: RequestOptions) {
-    console.log("Inside startJob")
     const RESTController = CoreManager.getRESTController();
 
-    console.log("About to encode data for startJob:", data);
     const payload = encode(data, true);
     options.returnStatus = true;
 

@@ -161,7 +161,6 @@ export function commitServerChanges(
   objectCache: ObjectCache,
   changes: AttributeMap
 ) {
-  console.log("Inside commitServerChanges")
   for (const attr in changes) {
     const val = changes[attr];
     nestedSet(serverData, attr, val);
@@ -172,7 +171,6 @@ export function commitServerChanges(
       !(val instanceof ParseFile) &&
       !(val instanceof ParseRelation)
     ) {
-      console.log("Inside commitServerChanges if, about to encode value:", val)
       const json = encode(val, false, true);
       objectCache[attr] = JSON.stringify(json);
     }

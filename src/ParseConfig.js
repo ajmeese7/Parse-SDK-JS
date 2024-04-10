@@ -196,11 +196,9 @@ const DefaultController = {
   },
 
   save(attrs: { [key: string]: any }, masterKeyOnlyFlags: { [key: string]: any }) {
-    console.log("save config attrs:", attrs);
     const RESTController = CoreManager.getRESTController();
     const encodedAttrs = {};
     for (const key in attrs) {
-      console.log("About to encode key:", key, "value:", attrs[key]);
       encodedAttrs[key] = encode(attrs[key]);
     }
     return RESTController.request(

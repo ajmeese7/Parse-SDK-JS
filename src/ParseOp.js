@@ -78,7 +78,6 @@ export class SetOp extends Op {
   }
 
   toJSON(offline?: boolean) {
-    console.log("Inside `SetOp.toJSON`, about to call `encode` with this._value:", this._value);
     return encode(this._value, false, true, undefined, offline, 0);
   }
 }
@@ -174,7 +173,6 @@ export class AddOp extends Op {
   }
 
   toJSON(): { __op: string, objects: mixed } {
-    console.log("Inside `AddOp.toJSON`, about to call `encode` with this._value:", this._value);
     return { __op: 'Add', objects: encode(this._value, false, true) };
   }
 }
@@ -226,7 +224,6 @@ export class AddUniqueOp extends Op {
   }
 
   toJSON(): { __op: string, objects: mixed } {
-    console.log("Inside `AddUniqueOp.toJSON`, about to call `encode` with this._value:", this._value);
     return { __op: 'AddUnique', objects: encode(this._value, false, true) };
   }
 }
@@ -295,7 +292,6 @@ export class RemoveOp extends Op {
   }
 
   toJSON(): { __op: string, objects: mixed } {
-    console.log("Inside `RemoveOp.toJSON`, about to call `encode` with this._value:", this._value);
     return { __op: 'Remove', objects: encode(this._value, false, true) };
   }
 }

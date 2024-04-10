@@ -2,7 +2,6 @@
  * @flow
  */
 
-import util from 'util';
 import ParseACL from './ParseACL';
 import ParseFile from './ParseFile';
 import ParseGeoPoint from './ParseGeoPoint';
@@ -10,6 +9,7 @@ import ParsePolygon from './ParsePolygon';
 import ParseObject from './ParseObject';
 import { Op } from './ParseOp';
 import ParseRelation from './ParseRelation';
+import { cyrb53 } from './CryptoUtils';
 
 const MAX_RECURSIVE_CALLS = 999;
 
@@ -19,18 +19,15 @@ function encode(
   forcePointers: boolean,
   seen: Array<mixed>,
   offline: boolean,
-  counter: number
+  counter: number,
+  initialValue: mixed
 ): any {
   counter++;
 
   if (counter > MAX_RECURSIVE_CALLS) {
     const message = 'Encoding object failed due to high number of recursive calls, likely caused by circular reference within object.';
     console.error(message);
-    console.error('Value causing potential infinite recursion:', util.inspect(value, { showHidden: false, depth: null }));
-    console.error('Disallow objects:', disallowObjects);
-    console.error('Force pointers:', forcePointers);
-    console.error('Seen:', seen);
-    console.error('Offline:', offline);
+    console.error('Value causing potential infinite recursion:', initialValue);
 
     throw new Error(message);
   }
@@ -77,16 +74,37 @@ function encode(
   ) {
     return value.source;
   } else if (Array.isArray(value)) {
-    return value.map(v => {
-      console.log("About to recurse and call `encode` with array value", v);
-      return encode(v, disallowObjects, forcePointers, seen, offline, counter);
-    });
+    return value.map(v => encode(v, disallowObjects, forcePointers, seen, offline, counter, initialValue));
   } else if (value && typeof value === 'object') {
-    console.log("Value in `encode` is an object:", value);
     const output = {};
     for (const k in value) {
-      console.log("About to recurse and call `encode` with object value", value[k]);
-      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline, counter);
+      try {
+        // Attempts to get the name of the object's constructor
+        // Ref: https://stackoverflow.com/a/332429/6456163
+        const name = value[k].name || value[k].constructor.name;
+        if (name && name != "undefined") {
+          if (seen.includes(name)) {
+            output[k] = value[k];
+            continue;
+          } else {
+            seen.push(name);
+          }
+        }
+      } catch (e) {
+        // Support anonymous functions by hashing the function body,
+        // preventing infinite recursion in the case of circular references
+        if (value[k] instanceof Function) {
+          const funcString = value[k].toString();
+          if (seen.includes(funcString)) {
+            output[k] = value[k];
+            continue;
+          } else {
+            const hash = cyrb53(funcString);
+            seen.push(hash);
+          }
+        }
+      }
+      output[k] = encode(value[k], disallowObjects, forcePointers, seen, offline, counter, initialValue);
     }
     return output;
   } else {
@@ -100,8 +118,8 @@ export default function (
   forcePointers?: boolean,
   seen?: Array<mixed>,
   offline?: boolean,
-  counter?: number
+  counter?: number,
+  initialValue?: mixed
 ): any {
-  console.log("Inside initial encode function call with value", value);
-  return encode(value, !!disallowObjects, !!forcePointers, seen || [], !!offline, counter || 0);
+  return encode(value, !!disallowObjects, !!forcePointers, seen || [], !!offline, counter || 0, initialValue || value);
 }

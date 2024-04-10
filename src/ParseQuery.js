@@ -345,7 +345,6 @@ class ParseQuery {
     if (!this._where[key] || typeof this._where[key] === 'string') {
       this._where[key] = {};
     }
-    console.log("Inside ParseQuery _addCondition...");
     this._where[key][condition] = encode(value, false, true);
     return this;
   }
@@ -1230,7 +1229,6 @@ class ParseQuery {
       return this.doesNotExist(key);
     }
 
-    console.log("In ParseQuery's `equalTo`, about to call encode value:", value, "key:", key);
     this._where[key] = encode(value, false, true);
     return this;
   }
